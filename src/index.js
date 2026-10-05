@@ -111,7 +111,7 @@ function validarReserva(req, res, next) {
         salasPermitidas.includes(sala) &&
         fecha &&
         turnosPermitidos.includes(turno) &&
-        Number.isFinite(personas) && personas >= 1 && personas <= 6;
+        Number.isInteger(personas) && personas >= 1 && personas <= 6;
 
     if (!esValido) {
         return res.status(400).render("reservas/nueva", {

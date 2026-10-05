@@ -59,6 +59,13 @@ POST /reservas
             └── finish: ID + estado + duración
 ```
 
+### Justificación del orden general
+El orden de registro en Express determina el orden de ejecución, creando dependencias vitales entre las funciones:
+1. **Morgan:** Se registra al inicio para que observe y registre absolutamente todas las solicitudes entrantes, incluyendo la carga de recursos estáticos.
+2. **identificarSolicitud:** Se coloca inmediatamente después para generar el ID. Debe ir estrictamente antes de `medirDuracion`, ya que la función de medición necesita leer el `solicitudId` de `res.locals` para imprimirlo en la terminal al finalizar.
+3. **Parsers (`express.urlencoded` y `express.json`):** Se ubican antes del enrutador (`reservasRouter`) para garantizar que el objeto `req.body` ya esté interpretado y construido cuando el middleware de ruta `validarReserva` intente acceder a los datos del formulario.
+4. **Página 404:** Se ubica al final de todo el pipeline para actuar como red de contención, capturando únicamente aquellas solicitudes que no hicieron "match" con ningún recurso estático ni ruta definida.
+
 ## Alcance de cada función
 - **Middleware incorporado, de terceros y personalizado:** El incorporado viene con Express (ej. `express.urlencoded`). El de terceros se instala vía npm (ej. `morgan`). El personalizado es desarrollado a medida en el código (ej. `identificarSolicitud` y `medirDuracion`).
 - **Uso de `next()`:** Se utiliza para ceder el control de la petición a la siguiente función aplicable en el pipeline de middleware; omitirlo suspende la solicitud a menos que se finalice la respuesta (con `.send`, `.json`, `.render`, etc.).
